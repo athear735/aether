@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  aether:
+    build: .
+    container_name: aether-ai
+    ports:
+      - "8000:8000"  # API
+      - "8501:8501"  # Web Interface
+    environment:
+      - AETHER_ENV=production
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - WEB_PORT=8501
+      - MODEL_CACHE=/app/model_cache
+    volumes:
+      - ./model_cache:/app/model_cache
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - aether-network
+    labels:
+      - "com.algorythm.tech.aether=true"
+      - "com.algorythm.tech.ceo=Sri Aasrith Souri Kompella"
+      - "com.algorythm.tech.company=AlgoRythm Tech"
+
+  redis:
+    image: redis:alpine
+    container_name: aether-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - aether-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: aether-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - aether
+    networks:
+      - aether-network
+    restart: unless-stopped
+
+networks:
+  aether-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  model-cache:
+  aether-data:
