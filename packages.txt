@@ -1,0 +1,12 @@
+# System packages required for Streamlit Cloud
+# These are installed via apt-get on Debian/Ubuntu systems
+
+# Build essentials (often needed for Python packages)
+build-essential
+
+# Common libraries
+libglib2.0-0
+libsm6
+libxext6
+libxrender-dev
+libgomp1

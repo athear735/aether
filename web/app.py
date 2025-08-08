@@ -84,9 +84,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # API Configuration
-API_BASE_URL = st.secrets.get("API_URL", "http://localhost:8000")
-if "API_URL" in os.environ:
-    API_BASE_URL = os.environ["API_URL"]
+# Try multiple sources for API URL
+try:
+    # First try Streamlit secrets
+    API_BASE_URL = st.secrets["API_URL"]
+except (KeyError, FileNotFoundError):
+    # Then try environment variable
+    API_BASE_URL = os.environ.get("API_URL", "http://localhost:8000")
+
+# Show warning if using localhost in production
+if "localhost" in API_BASE_URL and os.environ.get("STREAMLIT_RUNTIME_ENV") == "cloud":
+    st.warning("⚠️ Using localhost API in cloud deployment. Please configure API_URL in Streamlit secrets.")
 
 # Session State Initialization
 if "session_id" not in st.session_state:
