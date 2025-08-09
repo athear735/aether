@@ -1,6 +1,6 @@
 """
 AETHER Web Interface - Streamlit App
-© 2024 AlgoRythm Tech - Built by Sri Aasrith Souri Kompella
+© 2024 AlgoRythm Tech
 """
 
 import streamlit as st
@@ -33,63 +33,55 @@ st.markdown("""
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 10px;
-        margin-bottom: 2rem;
-    }
-    
-    .stApp {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    }
-    
-    .chat-message {
-        padding: 1rem;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-    }
-    
-    .user-message {
-        background-color: #e3f2fd;
-        margin-left: 20%;
-    }
-    
-    .assistant-message {
-        background-color: #f3e5f5;
-        margin-right: 20%;
-    }
-    
-    .sidebar-header {
-        text-align: center;
-        padding: 1rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-    }
-    
-    .metric-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
-    }
-    
-    .footer {
-        text-align: center;
-        padding: 2rem;
-        margin-top: 3rem;
-        border-top: 1px solid #ddd;
-        color: #666;
-    }
-</style>
-""", unsafe_allow_html=True)
+        # Add user message
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        st.session_state.messages.append({
+            "role": "user",
+            "content": prompt,
+            "timestamp": timestamp
+        })
 
-# API Configuration
-# Try multiple sources for API URL
-try:
-    # First try Streamlit secrets
-    API_BASE_URL = st.secrets["API_URL"]
-except (KeyError, FileNotFoundError):
-    # Then try environment variable
+        # Display user message
+        display_message("user", prompt, timestamp)
+
+        # Show thinking indicator
+        with st.chat_message("assistant", avatar="\ud83e\uddd0"):
+            with st.spinner("AETHER is thinking..."):
+                # Call API
+                response_data = call_api("/chat", "POST", {
+                    "message": prompt,
+                    "session_id": st.session_state.session_id,
+                    "user_id": st.session_state.user_id,
+                    "stream": False
+                })
+
+                if not response_data:
+                    st.error("AETHER backend is unreachable. Please ensure the backend API is running.")
+                    return
+
+                response_text = response_data.get("response", "I'm having trouble processing that request.")
+                confidence = response_data.get("confidence", 0)
+
+                # Display response
+                st.markdown(response_text)
+
+                # Show confidence meter
+                if confidence > 0:
+                    st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
+
+                # Show metadata in expander
+                if "metadata" in response_data:
+                    with st.expander("Response Details"):
+                        st.json(response_data["metadata"])
+
+                # Add to messages
+                response_timestamp = datetime.now().strftime("%H:%M:%S")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response_text,
+                    "timestamp": response_timestamp,
+                    "confidence": confidence
+                })
     API_BASE_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 # Show warning if using localhost in production
@@ -127,78 +119,62 @@ def call_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) ->
         elif method == "DELETE":
             response = requests.delete(url)
         else:
-            raise ValueError(f"Unsupported method: {method}")
-        
+            return {}
         if response.status_code == 200:
             return response.json()
-        else:
-            st.error(f"API Error: {response.status_code} - {response.text}")
-            return {}
-    except requests.exceptions.ConnectionError:
-        st.error("⚠️ Cannot connect to AETHER API. Please ensure the backend is running.")
         return {}
-    except Exception as e:
-        st.error(f"Error: {str(e)}")
+    except Exception:
         return {}
 
 def display_message(role: str, content: str, timestamp: Optional[str] = None):
-    """Display a chat message"""
-    if role == "user":
-        with st.chat_message("user", avatar="👤"):
-            st.markdown(content)
-            if timestamp:
-                st.caption(f"Sent at {timestamp}")
-    else:
-        with st.chat_message("assistant", avatar="🧠"):
-            st.markdown(content)
-            if timestamp:
-                st.caption(f"AETHER responded at {timestamp}")
+        # Add user message
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        st.session_state.messages.append({
+            "role": "user",
+            "content": prompt,
+            "timestamp": timestamp
+        })
 
-# Main Header
-st.markdown("""
-<div class="main-header">
-    <h1>🧠 AETHER</h1>
-    <h3>Advanced Engine for Thought, Heuristic Emotion and Reasoning</h3>
-    <p>Built with ❤️ by AlgoRythm Tech </p>
-    <p><em>The first AI built by teens, for everyone!</em></p>
-</div>
-""", unsafe_allow_html=True)
+        # Display user message
+        display_message("user", prompt, timestamp)
 
-# Sidebar
-with st.sidebar:
-    st.markdown("""
-    <div class="sidebar-header">
-        <h2>⚙️ AETHER Control Panel</h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # User Info
-    st.markdown("### 👤 User Profile")
-    st.info(f"User ID: {st.session_state.user_id}")
-    st.info(f"Session: {st.session_state.session_id[:8]}...")
-    
-    # Customization Section
-    st.markdown("### 🎨 Customize AETHER")
-    
-    with st.expander("Personality Settings", expanded=True):
-        personality = st.select_slider(
-            "Personality Type",
-            options=["Professional", "Balanced", "Friendly", "Creative", "Technical"],
-            value="Balanced",
-            help="How would you like AETHER to interact with you?"
-        )
-        
-        response_style = st.selectbox(
-            "Response Style",
-            ["Concise", "Comprehensive", "Detailed", "Simple"],
-            help="How detailed should AETHER's responses be?"
-        )
-        
-        language_pref = st.selectbox(
-            "Language Preference",
-            ["Accessible", "Technical", "Academic", "Casual"],
-            help="What language style do you prefer?"
-        )
+        # Show thinking indicator
+        with st.chat_message("assistant", avatar="\ud83e\uddd0"):
+            with st.spinner("AETHER is thinking..."):
+                # Call API
+                response_data = call_api("/chat", "POST", {
+                    "message": prompt,
+                    "session_id": st.session_state.session_id,
+                    "user_id": st.session_state.user_id,
+                    "stream": False
+                })
+
+                if not response_data:
+                    return
+
+                response_text = response_data.get("response", "I'm having trouble processing that request.")
+                confidence = response_data.get("confidence", 0)
+
+                # Display response
+                st.markdown(response_text)
+
+                # Show confidence meter
+                if confidence > 0:
+                    st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
+
+                # Show metadata in expander
+                if "metadata" in response_data:
+                    with st.expander("Response Details"):
+                        st.json(response_data["metadata"])
+
+                # Add to messages
+                response_timestamp = datetime.now().strftime("%H:%M:%S")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response_text,
+                    "timestamp": response_timestamp,
+                    "confidence": confidence
+                })
     
     with st.expander("Expertise Areas"):
         expertise = st.multiselect(
@@ -236,8 +212,7 @@ with st.sidebar:
         if result.get("status") == "success":
             st.success("✅ AETHER customized successfully!")
             st.session_state.customization = customization_data
-        else:
-            st.error("Failed to apply customization")
+        return
     
     # Actions
     st.markdown("### 🎯 Actions")
@@ -280,7 +255,7 @@ with main_container:
         <div style='text-align: center; padding: 2rem;'>
             <h2>Welcome to AETHER! 🎉</h2>
             <p>I'm your Advanced Engine for Thought, Heuristic Emotion and Reasoning.</p>
-            <p>Created by <strong>AlgoRythm Tech</strong> under the leadership of <strong>Sri Aasrith Souri Kompella</strong>.</p>
+            <p>Created by <strong>AlgoRythm Tech</strong>.</p>
             <p>Ask me anything or customize my behavior using the sidebar!</p>
         </div>
         """, unsafe_allow_html=True)
@@ -407,7 +382,7 @@ with st.expander("📝 Provide Feedback", expanded=False):
 st.markdown("""
 <div class="footer">
     <p><strong>AETHER</strong> - Advanced Engine for Thought, Heuristic Emotion and Reasoning</p>
-    <p>© 2024 AlgoRythm Tech | CEO: Sri Aasrith Souri Kompella</p>
+    <p>© 2024 AlgoRythm Tech</p>
     <p>The world's first fully teen-built AI startup 🚀</p>
     <p><em>"AI should adapt to you, not the other way around."</em></p>
 </div>
