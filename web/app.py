@@ -360,11 +360,14 @@ with st.expander("📝 Provide Feedback", expanded=False):
                 st.warning("Please interact with AETHER before providing feedback.")
 
 # Footer
-st.markdown("""
-<div class="footer">
-    <p><strong>AETHER</strong> - Advanced Engine for Thought, Heuristic Emotion and Reasoning</p>
-    <p>2024 AlgoRythm Tech</p>
-    <p>The world's first fully teen-built AI startup</p>
-    <p><em>"AI should adapt to you, not the other way around."</em></p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="footer">
+        <p><strong>AETHER</strong> - Advanced Engine for Thought, Heuristic Emotion and Reasoning</p>
+        <p>2024 AlgoRythm Tech</p>
+        <p>The world's first fully teen-built AI startup</p>
+        <p><em>"AI should adapt to you, not the other way around."</em></p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
