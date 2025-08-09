@@ -228,33 +228,33 @@ with main_container:
         )
     
     # Chat input
-    if prompt := st.chat_input("Ask AETHER anything..."):
-        handle_chat_response(prompt)
+if prompt := st.chat_input("Ask AETHER anything..."):
+    handle_chat_response(prompt)
                 
-                if response_data:
-                    response_text = response_data.get("response", "I'm having trouble processing that request.")
-                    confidence = response_data.get("confidence", 0)
-                    
-                    # Display response
-                    st.markdown(response_text)
-                    
-                    # Show confidence meter
-                    if confidence > 0:
-                        st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
-                    
-                    # Show metadata in expander
-                    if "metadata" in response_data:
-                        with st.expander("Response Details"):
-                            st.json(response_data["metadata"])
-                    
-                    # Add to messages
-                    response_timestamp = datetime.now().strftime("%H:%M:%S")
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": response_text,
-                        "timestamp": response_timestamp,
-                        "confidence": confidence
-                    })
+            if response_data:
+                response_text = response_data.get("response", "I'm having trouble processing that request.")
+                confidence = response_data.get("confidence", 0)
+                
+                # Display response
+                st.markdown(response_text)
+                
+                # Show confidence meter
+                if confidence > 0:
+                    st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
+                
+                # Show metadata in expander
+                if "metadata" in response_data:
+                    with st.expander("Response Details"):
+                        st.json(response_data["metadata"])
+                
+                # Add to messages
+                response_timestamp = datetime.now().strftime("%H:%M:%S")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response_text,
+                    "timestamp": response_timestamp,
+                    "confidence": confidence
+                })
                 # If no response_data, do nothing (no fallback)
 
 # Features Section
