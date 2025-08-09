@@ -1,6 +1,6 @@
 """
 AETHER Web Interface - Streamlit App
-© 2024 AlgoRythm Tech
+2024 AlgoRythm Tech
 """
 
 import streamlit as st
@@ -363,7 +363,7 @@ with st.expander("📝 Provide Feedback", expanded=False):
 st.markdown("""
 <div class="footer">
     <p><strong>AETHER</strong> - Advanced Engine for Thought, Heuristic Emotion and Reasoning</p>
-    <p>© 2024 AlgoRythm Tech</p>
+    <p>2024 AlgoRythm Tech</p>
     <p>The world's first fully teen-built AI startup</p>
     <p><em>"AI should adapt to you, not the other way around."</em></p>
 </div>
