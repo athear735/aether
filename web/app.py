@@ -78,14 +78,66 @@ def call_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) ->
         if response.status_code == 200:
             return response.json()
         return {}
-    except Exception:
+    except Exception as e:
+        st.error(f"API Error: {str(e)}")
         return {}
 
 def display_message(role: str, content: str, timestamp: Optional[str] = None):
+    """Display a chat message with optional timestamp"""
     with st.chat_message(role):
         st.write(content)
         if timestamp:
             st.caption(f"Sent at {timestamp}")
+
+def handle_chat_response(prompt: str) -> None:
+    """Handle the chat response flow"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    
+    # Add and display user message
+    st.session_state.messages.append({
+        "role": "user",
+        "content": prompt,
+        "timestamp": timestamp
+    })
+    display_message("user", prompt, timestamp)
+    
+    # Handle AI response
+    with st.chat_message("assistant"):
+        with st.spinner("AETHER is thinking..."):
+            response_data = call_api("/chat", "POST", {
+                "message": prompt,
+                "session_id": st.session_state.session_id,
+                "user_id": st.session_state.user_id,
+                "stream": False
+            })
+            
+            if response_data:
+                response_text = response_data.get("response", "I'm having trouble processing that request.")
+                confidence = response_data.get("confidence", 0)
+                
+                # Display response
+                st.markdown(response_text)
+                
+                # Show confidence meter
+                if confidence > 0:
+                    st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
+                
+                # Show metadata in expander
+                if "metadata" in response_data:
+                    with st.expander("Response Details"):
+                        st.json(response_data["metadata"])
+                
+                # Add to messages
+                response_timestamp = datetime.now().strftime("%H:%M:%S")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response_text,
+                    "timestamp": response_timestamp,
+                    "confidence": confidence
+                })
+            else:
+                st.error("Unable to get a response from AETHER. Please try again.")
+
 # Expertise Areas Section
 with st.expander("Expertise Areas"):
     expertise = st.multiselect(
@@ -109,6 +161,11 @@ with st.expander("Advanced Settings"):
         help="Higher = more creative, Lower = more focused"
     )
     
+# Customization Settings
+personality = st.selectbox("Personality", ["Balanced", "Professional", "Friendly", "Technical"])
+response_style = st.selectbox("Response Style", ["Comprehensive", "Concise", "Casual", "Formal"])
+language_pref = st.selectbox("Language Style", ["Accessible", "Technical", "Simple", "Detailed"])
+
 # Apply Customization Button
 if st.button("Apply Customization", type="primary", use_container_width=True):
     customization_data = {
@@ -172,27 +229,7 @@ with main_container:
     
     # Chat input
     if prompt := st.chat_input("Ask AETHER anything..."):
-        # Add user message
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        st.session_state.messages.append({
-            "role": "user",
-            "content": prompt,
-            "timestamp": timestamp
-        })
-        
-        # Display user message
-        display_message("user", prompt, timestamp)
-        
-        # Show thinking indicator
-        with st.chat_message("assistant"):
-            with st.spinner("AETHER is thinking..."):
-                # Call API
-                response_data = call_api("/chat", "POST", {
-                    "message": prompt,
-                    "session_id": st.session_state.session_id,
-                    "user_id": st.session_state.user_id,
-                    "stream": False
-                })
+        handle_chat_response(prompt)
                 
                 if response_data:
                     response_text = response_data.get("response", "I'm having trouble processing that request.")
