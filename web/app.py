@@ -36,13 +36,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-        # Display user message
-        display_message("user", prompt, timestamp)
-
-        # Show thinking indicator
-        with st.chat_message("assistant", avatar="\ud83e\uddd0"):
-            with st.spinner("AETHER is thinking..."):
                 # Call API
                 response_data = call_api("/chat", "POST", {
                     "message": prompt,
@@ -123,54 +116,10 @@ def call_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) ->
         return {}
 
 def display_message(role: str, content: str, timestamp: Optional[str] = None):
-        # Add user message
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        st.session_state.messages.append({
-            "role": "user",
-            "content": prompt,
-            "timestamp": timestamp
-        })
-
-        # Display user message
-        display_message("user", prompt, timestamp)
-
-        # Show thinking indicator
-        with st.chat_message("assistant", avatar="\ud83e\uddd0"):
-            with st.spinner("AETHER is thinking..."):
-                # Call API
-                response_data = call_api("/chat", "POST", {
-                    "message": prompt,
-                    "session_id": st.session_state.session_id,
-                    "user_id": st.session_state.user_id,
-                    "stream": False
-                })
-
-                if not response_data:
-                    return
-
-                response_text = response_data.get("response", "I'm having trouble processing that request.")
-                confidence = response_data.get("confidence", 0)
-
-                # Display response
-                st.markdown(response_text)
-
-                # Show confidence meter
-                if confidence > 0:
-                    st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
-
-                # Show metadata in expander
-                if "metadata" in response_data:
-                    with st.expander("Response Details"):
-                        st.json(response_data["metadata"])
-
-                # Add to messages
-                response_timestamp = datetime.now().strftime("%H:%M:%S")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response_text,
-                    "timestamp": response_timestamp,
-                    "confidence": confidence
-                })
+    with st.chat_message(role):
+        st.write(content)
+        if timestamp:
+            st.caption(f"Sent at {timestamp}")
     
     with st.expander("Expertise Areas"):
         expertise = st.multiselect(
@@ -215,13 +164,13 @@ def display_message(role: str, content: str, timestamp: Optional[str] = None):
     
     col1, col2 = st.columns(2)
     with col1:
-    if st.button("New Session", use_container_width=True):
+        if st.button("New Session", use_container_width=True):
             st.session_state.session_id = str(uuid.uuid4())
             st.session_state.messages = []
             st.rerun()
     
     with col2:
-    if st.button("Clear Chat", use_container_width=True):
+        if st.button("Clear Chat", use_container_width=True):
             st.session_state.messages = []
             call_api(f"/session/{st.session_state.session_id}", "DELETE")
             st.rerun()
