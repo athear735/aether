@@ -252,12 +252,14 @@ with main_container:
     # Welcome message if no messages
     if not st.session_state.messages:
         st.markdown(
-            """<div style='text-align: center; padding: 2rem;'>"
-            "<h2>Welcome to AETHER!</h2>"
-            "<p>I'm your Advanced Engine for Thought, Heuristic Emotion and Reasoning.</p>"
-            "<p>Created by <strong>AlgoRythm Tech</strong>.</p>"
-            "<p>Ask me anything or customize my behavior using the sidebar!</p>"
-            "</div>" , unsafe_allow_html=True)
+            """
+            <div style='text-align: center; padding: 2rem;'>
+                <h2>Welcome to AETHER!</h2>
+                <p>I'm your Advanced Engine for Thought, Heuristic Emotion and Reasoning.</p>
+                <p>Created by <strong>AlgoRythm Tech</strong>.</p>
+                <p>Ask me anything or customize my behavior using the sidebar!</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     # Display chat messages
     for message in st.session_state.messages:
