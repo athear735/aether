@@ -34,7 +34,8 @@ st.markdown("""
         color: white;
         border-radius: 10px;
     }
-"""
+</style>
+""", unsafe_allow_html=True)
 
         # Display user message
         display_message("user", prompt, timestamp)
