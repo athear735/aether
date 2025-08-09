@@ -159,7 +159,7 @@ st.markdown("""
 <div class="main-header">
     <h1>🧠 AETHER</h1>
     <h3>Advanced Engine for Thought, Heuristic Emotion and Reasoning</h3>
-    <p>Built with ❤️ by AlgoRythm Tech | CEO: Sri Aasrith Souri Kompella</p>
+    <p>Built with ❤️ by AlgoRythm Tech </p>
     <p><em>The first AI built by teens, for everyone!</em></p>
 </div>
 """, unsafe_allow_html=True)
