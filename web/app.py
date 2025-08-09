@@ -124,7 +124,6 @@ if st.button("Apply Customization", type="primary", use_container_width=True):
     if result.get("status") == "success":
         st.success("✅ AETHER customized successfully!")
         st.session_state.customization = customization_data
-    return
 
 # Actions
 st.markdown("### Actions")
