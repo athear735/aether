@@ -253,7 +253,7 @@ with main_container:
     if not st.session_state.messages:
         st.markdown("""
         <div style='text-align: center; padding: 2rem;'>
-            <h2>Welcome to AETHER! 🎉</h2>
+            <h2>Welcome to AETHER!</h2>
             <p>I'm your Advanced Engine for Thought, Heuristic Emotion and Reasoning.</p>
             <p>Created by <strong>AlgoRythm Tech</strong>.</p>
             <p>Ask me anything or customize my behavior using the sidebar!</p>
