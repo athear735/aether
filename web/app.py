@@ -19,7 +19,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Page configuration
 st.set_page_config(
     page_title="AETHER - AlgoRythm Tech",
-    page_icon="🧠",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -198,7 +198,7 @@ def display_message(role: str, content: str, timestamp: Optional[str] = None):
         )
     
     # Apply Customization Button
-    if st.button("🔧 Apply Customization", type="primary", use_container_width=True):
+    if st.button("Apply Customization", type="primary", use_container_width=True):
         customization_data = {
             "user_id": st.session_state.user_id,
             "personality": personality.lower(),
@@ -215,23 +215,23 @@ def display_message(role: str, content: str, timestamp: Optional[str] = None):
         return
     
     # Actions
-    st.markdown("### 🎯 Actions")
+    st.markdown("### Actions")
     
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🔄 New Session", use_container_width=True):
+    if st.button("New Session", use_container_width=True):
             st.session_state.session_id = str(uuid.uuid4())
             st.session_state.messages = []
             st.rerun()
     
     with col2:
-        if st.button("🗑️ Clear Chat", use_container_width=True):
+    if st.button("Clear Chat", use_container_width=True):
             st.session_state.messages = []
             call_api(f"/session/{st.session_state.session_id}", "DELETE")
             st.rerun()
     
     # Stats
-    st.markdown("### 📊 AETHER Stats")
+    st.markdown("### AETHER Stats")
     stats = call_api("/stats")
     if stats:
         st.metric("Total Sessions", stats.get("total_sessions", 0))
@@ -239,7 +239,7 @@ def display_message(role: str, content: str, timestamp: Optional[str] = None):
         st.metric("Messages Processed", stats.get("total_messages", 0))
     
     # Info
-    st.markdown("### ℹ️ About AETHER")
+    st.markdown("### About AETHER")
     info = call_api("/info")
     if info:
         with st.expander("System Information"):
@@ -260,7 +260,7 @@ with main_container:
         )
     
     # Chat input
-    if prompt := st.chat_input("💭 Ask AETHER anything..."):
+    if prompt := st.chat_input("Ask AETHER anything..."):
         # Add user message
         timestamp = datetime.now().strftime("%H:%M:%S")
         st.session_state.messages.append({
@@ -273,7 +273,7 @@ with main_container:
         display_message("user", prompt, timestamp)
         
         # Show thinking indicator
-        with st.chat_message("assistant", avatar="🧠"):
+    with st.chat_message("assistant"):
             with st.spinner("AETHER is thinking..."):
                 # Call API
                 response_data = call_api("/chat", "POST", {
@@ -310,12 +310,12 @@ with main_container:
                 # If no response_data, do nothing (no fallback)
 
 # Features Section
-with st.expander("✨ AETHER Features", expanded=False):
+with st.expander("AETHER Features", expanded=False):
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
-        **🧠 Advanced Reasoning**
+    **Advanced Reasoning**
         - Multi-layer thought processing
         - Complex problem solving
         - Logical deduction
@@ -323,7 +323,7 @@ with st.expander("✨ AETHER Features", expanded=False):
     
     with col2:
         st.markdown("""
-        **❤️ Emotional Intelligence**
+    **Emotional Intelligence**
         - Context understanding
         - Empathetic responses
         - Mood detection
@@ -331,7 +331,7 @@ with st.expander("✨ AETHER Features", expanded=False):
     
     with col3:
         st.markdown("""
-        **🎯 Customization**
+    **Customization**
         - Personalized interactions
         - Adaptive learning
         - User preferences
@@ -364,7 +364,7 @@ st.markdown("""
 <div class="footer">
     <p><strong>AETHER</strong> - Advanced Engine for Thought, Heuristic Emotion and Reasoning</p>
     <p>© 2024 AlgoRythm Tech</p>
-    <p>The world's first fully teen-built AI startup 🚀</p>
+    <p>The world's first fully teen-built AI startup</p>
     <p><em>"AI should adapt to you, not the other way around."</em></p>
 </div>
 """, unsafe_allow_html=True)
