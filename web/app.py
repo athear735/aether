@@ -307,17 +307,7 @@ with main_container:
                         "timestamp": response_timestamp,
                         "confidence": confidence
                     })
-                else:
-                    fallback_response = """I'm AETHER, created by AlgoRythm Tech. 
-                    I'm currently unable to connect to my main processing system, 
-                    but I'm still here to help! Please ensure the backend API is running."""
-                    
-                    st.markdown(fallback_response)
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": fallback_response,
-                        "timestamp": datetime.now().strftime("%H:%M:%S")
-                    })
+                # If no response_data, do nothing (no fallback)
 
 # Features Section
 with st.expander("✨ AETHER Features", expanded=False):
