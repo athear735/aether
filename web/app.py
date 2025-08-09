@@ -128,21 +128,21 @@ if st.button("Apply Customization", type="primary", use_container_width=True):
 
 # Actions
 st.markdown("### Actions")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("New Session", use_container_width=True):
-            st.session_state.session_id = str(uuid.uuid4())
-            st.session_state.messages = []
-            st.rerun()
-    
-    with col2:
-        if st.button("Clear Chat", use_container_width=True):
-            st.session_state.messages = []
-            call_api(f"/session/{st.session_state.session_id}", "DELETE")
-            st.rerun()
-    
-    # Stats
+
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("New Session", use_container_width=True):
+        st.session_state.session_id = str(uuid.uuid4())
+        st.session_state.messages = []
+        st.rerun()
+
+with col2:
+    if st.button("Clear Chat", use_container_width=True):
+        st.session_state.messages = []
+        call_api(f"/session/{st.session_state.session_id}", "DELETE")
+        st.rerun()
+
+# Stats
     st.markdown("### AETHER Stats")
     stats = call_api("/stats")
     if stats:
