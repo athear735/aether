@@ -36,42 +36,8 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-                # Call API
-                response_data = call_api("/chat", "POST", {
-                    "message": prompt,
-                    "session_id": st.session_state.session_id,
-                    "user_id": st.session_state.user_id,
-                    "stream": False
-                })
-
-                if not response_data:
-                    st.error("AETHER backend is unreachable. Please ensure the backend API is running.")
-                    return
-
-                response_text = response_data.get("response", "I'm having trouble processing that request.")
-                confidence = response_data.get("confidence", 0)
-
-                # Display response
-                st.markdown(response_text)
-
-                # Show confidence meter
-                if confidence > 0:
-                    st.progress(confidence, text=f"Confidence: {confidence*100:.1f}%")
-
-                # Show metadata in expander
-                if "metadata" in response_data:
-                    with st.expander("Response Details"):
-                        st.json(response_data["metadata"])
-
-                # Add to messages
-                response_timestamp = datetime.now().strftime("%H:%M:%S")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response_text,
-                    "timestamp": response_timestamp,
-                    "confidence": confidence
-                })
-    API_BASE_URL = os.environ.get("API_URL", "http://localhost:8000")
+# API Configuration
+API_BASE_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 # Show warning if using localhost in production
 if "localhost" in API_BASE_URL and os.environ.get("STREAMLIT_RUNTIME_ENV") == "cloud":
@@ -120,47 +86,48 @@ def display_message(role: str, content: str, timestamp: Optional[str] = None):
         st.write(content)
         if timestamp:
             st.caption(f"Sent at {timestamp}")
+# Expertise Areas Section
+with st.expander("Expertise Areas"):
+    expertise = st.multiselect(
+        "Select Areas of Focus",
+        ["Coding", "AI/ML", "Science", "Math", "Writing", 
+         "Business", "Philosophy", "Arts", "Technology", "Education"],
+        help="AETHER will tailor responses to these areas"
+    )
+
+# Advanced Settings Section
+with st.expander("Advanced Settings"):
+    custom_instructions = st.text_area(
+        "Custom Instructions",
+        placeholder="Tell AETHER how you'd like it to behave...",
+        help="Provide specific instructions for AETHER"
+    )
     
-    with st.expander("Expertise Areas"):
-        expertise = st.multiselect(
-            "Select Areas of Focus",
-            ["Coding", "AI/ML", "Science", "Math", "Writing", 
-             "Business", "Philosophy", "Arts", "Technology", "Education"],
-            help="AETHER will tailor responses to these areas"
-        )
+    temperature = st.slider(
+        "Creativity Level",
+        0.1, 1.0, 0.7, 0.1,
+        help="Higher = more creative, Lower = more focused"
+    )
     
-    with st.expander("Advanced Settings"):
-        custom_instructions = st.text_area(
-            "Custom Instructions",
-            placeholder="Tell AETHER how you'd like it to behave...",
-            help="Provide specific instructions for AETHER"
-        )
-        
-        temperature = st.slider(
-            "Creativity Level",
-            0.1, 1.0, 0.7, 0.1,
-            help="Higher = more creative, Lower = more focused"
-        )
+# Apply Customization Button
+if st.button("Apply Customization", type="primary", use_container_width=True):
+    customization_data = {
+        "user_id": st.session_state.user_id,
+        "personality": personality.lower(),
+        "response_style": response_style.lower(),
+        "expertise_areas": expertise,
+        "language_preference": language_pref.lower(),
+        "custom_instructions": custom_instructions
+    }
     
-    # Apply Customization Button
-    if st.button("Apply Customization", type="primary", use_container_width=True):
-        customization_data = {
-            "user_id": st.session_state.user_id,
-            "personality": personality.lower(),
-            "response_style": response_style.lower(),
-            "expertise_areas": expertise,
-            "language_preference": language_pref.lower(),
-            "custom_instructions": custom_instructions
-        }
-        
-        result = call_api("/customize", "POST", customization_data)
-        if result.get("status") == "success":
-            st.success("✅ AETHER customized successfully!")
-            st.session_state.customization = customization_data
-        return
-    
-    # Actions
-    st.markdown("### Actions")
+    result = call_api("/customize", "POST", customization_data)
+    if result.get("status") == "success":
+        st.success("✅ AETHER customized successfully!")
+        st.session_state.customization = customization_data
+    return
+
+# Actions
+st.markdown("### Actions")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -218,7 +185,7 @@ with main_container:
         display_message("user", prompt, timestamp)
         
         # Show thinking indicator
-    with st.chat_message("assistant"):
+        with st.chat_message("assistant"):
             with st.spinner("AETHER is thinking..."):
                 # Call API
                 response_data = call_api("/chat", "POST", {
